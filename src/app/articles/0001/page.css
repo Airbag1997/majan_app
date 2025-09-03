@@ -1,0 +1,105 @@
+/* 全体のスタイル */
+body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    margin: 0;
+    color: #252525;
+    background-color: #ffffff;
+}
+
+/* アプリ全体のコンテナ */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダー */
+header {
+    background-color: #5d4037; /* 茶色 */
+    padding: 20px;
+    text-align: center;
+    border-bottom: 5px solid #4e342e;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* メインレイアウト */
+.main-layout {
+    display: flex;
+    flex-grow: 1;
+}
+
+/* サイドバー */
+.left-sidebar, .right-sidebar {
+    flex: 0 0 100px;
+    background-color: #5d4037; /* 茶色 */
+    border-right: 5px solid #4e342e;
+    border-left: 5px solid #4e342e;
+}
+
+/* メインコンテンツ */
+.main-content {
+    flex-grow: 1;
+    background-color: #004d40; /* 深緑 */
+    padding: 20px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.main-content section {
+    background-color: rgb(255, 255, 255);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-left: 5px solid #f9a825; /* アクセントカラー */
+}
+
+.main-content h2 {
+    color: #000000(40, 100%, 49%); /* アクセントカラー */
+    border-bottom: 2px solid #f9a825;
+    padding-bottom: 5px;
+    margin-top: 0;
+    font-weight:bold;
+}
+
+.main-content p {
+    line-height: 1.8;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.example {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+/* フッター */
+footer {
+    background-color: #5d4037; /* 茶色 */
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    border-top: 5px solid #4e342e;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .main-layout {
+        flex-direction: column;
+    }
+    .left-sidebar, .right-sidebar {
+        display: none;
+    }
+}
