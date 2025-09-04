@@ -38,7 +38,7 @@ export default function RootLayout({
           </nav>
         </div>
         <div className="bg-amber-800 pr-[5%] pl-[5%] pt-[56]">
-        <div className="bg-green-800 h-250">
+        <div className="bg-green-800">
         {children}
         </div>
         </div>
