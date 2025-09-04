@@ -27,7 +27,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex items-center justify-between pr-[5%] pl-[5%] pt-4 pb-4 bg-amber-800 fixed w-full shadow-2xl">
+        <div className="flex items-center justify-between pr-[5%] pl-[5%] pt-4 pb-4 bg-amber-800 fixed w-full shadow-2xl z-50">
           <h1 className="text-[1.1rem] h-[26px] font-bold">
             麻雀アプリ
           </h1>
