@@ -18,7 +18,7 @@ export default function Home() {
         console.log("result:", result.success ? "成功" : result.error.message)
     }
     return (
-        <div className="min-h-screen bg-green-600 flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center">
             <form action={sendMessage} className="flex flex-col gap-4 text-center items-center">
                 <p className="w-50 bg-yellow-100 text-red-500">お問い合わせ</p>
                 <input type="text" placeholder="Name" name="Name" className="border-4 p-2 rounded-md w-100 text-white"></input>
