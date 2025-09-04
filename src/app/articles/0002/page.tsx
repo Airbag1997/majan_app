@@ -57,7 +57,7 @@ export default function App() {
           onClick={() => {
             const yaku = randomYAKU();
             setText(yaku.name);
-            setPoint(yaku.halfPoint);
+            setPoint(String(yaku.halfPoint));
           }}
           className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-lg font-bold rounded-xl shadow-lg border-2 border-yellow-400 transition-transform transform hover:scale-105"
         >
