@@ -27,9 +27,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="bg-green-500">
-        <p>header</p>
+        <div className="flex items-center justify-between pr-[5%] pl-[5%] pt-4 pb-4 bg-amber-800 fixed w-full shadow-2xl">
+          <h1 className="text-[1.1rem] h-[26px] font-bold">
+            麻雀アプリ
+          </h1>
+          <nav>
+            <a href="#" className="ml-3 font-semibold">機能一覧</a>
+            <a href="#" className="ml-3 font-semibold">記事一覧</a>
+            <a href="#" className="ml-3 font-semibold">お問い合わせ</a>
+          </nav>
+        </div>
+        <div className="bg-amber-800 pr-[5%] pl-[5%] pt-[56]">
+        <div className="bg-green-800 h-250">
         {children}
+        </div>
+        </div>
+        <div className="pt-4 pb-4 pr-[5%] pl-[5%] bg-amber-800">
+          <p className="mt-[16px] mb-[16px] text-center">
+            &copy; 2025 Majanapp. All rights reserved.
+          </p>
         </div>
       </body>
     </html>
