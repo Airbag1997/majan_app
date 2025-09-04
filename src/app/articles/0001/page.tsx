@@ -8,7 +8,7 @@ const App: React.FC = () => {
     <div className="app-container">
     
       <div className="flex flex-col min-h-100">
-        <aside className="left-sidebar"></aside>
+        
         <main className="main-content">
           <Section title="🀄️ 麻雀はどんなゲーム？">
             <p>麻雀は、4人で遊ぶカードゲームのようなものです。ただし、使うのはトランプではなく、<strong>「牌（パイ）」</strong>と呼ばれる専用の道具。山から牌を引いたり、他のプレイヤーが捨てた牌をもらったりしながら、特定の形に揃えることを目指します。</p>
@@ -35,7 +35,7 @@ const App: React.FC = () => {
             </div>
           </Section>
         </main>
-        <aside className="right-sidebar"></aside>
+        
       </div>
     
     </div>
