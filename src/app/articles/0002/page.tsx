@@ -19,7 +19,7 @@ const YAKU = [
   { name: "混一色 (ホンイツ)", halfPoint: 2000 },
   { name: "清一色 (チンイツ)", halfPoint: 6000 },
   { name: "小三元", halfPoint: 1000 },
-  { name: "二盃口 (リャンペーコー)", halfPoint: 1950 },
+  { name: "二盃口 (リャンペーコー)", halfPoint: 3000 },
   { name: "大三元", halfPoint: 16000 },
   { name: "小四喜", halfPoint: 16000 },
   { name: "大四喜", halfPoint: 16000 }, // ダブル役満を考慮するなら 32000
