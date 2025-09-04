@@ -4,7 +4,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div>
+    <div className="bg-lime-600 p-2">
       <MahjongScorer />
     </div>
   );

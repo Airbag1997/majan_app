@@ -371,41 +371,254 @@ function detectFlush(counts: number[]): {
   return {};
 }
 
+// ---- 役検出ヘルパ ----
+const winds: Honor[] = ["E", "S", "W", "N"];
+const dragons: Honor[] = ["P", "F", "C"];
+
+function allTerminalsOrHonors(counts: number[]) {
+  for (let i = 0; i < 34; i++) {
+    if (counts[i] === 0) continue;
+    if (i < 27) {
+      const n = idxNumber(i);
+      if (n !== 1 && n !== 9) return false;
+    } else {
+      // 字はOK
+    }
+  }
+  return true;
+}
+function terminalsOnly(counts: number[]) {
+  for (let i = 0; i < 34; i++) {
+    if (counts[i] === 0) continue;
+    if (i >= 27) return false;
+    const n = idxNumber(i);
+    if (n !== 1 && n !== 9) return false;
+  }
+  return true;
+}
+function honorsOnly(counts: number[]) {
+  for (let i = 27; i < 34; i++) if (counts[i] > 0) continue; // ok
+  for (let i = 0; i < 27; i++) if (counts[i] > 0) return false;
+  return true;
+}
+function greenOnly(counts: number[]) {
+  // 緑一色: 索の2,3,4,6,8 と 發 のみ
+  const greenIdx = new Set<number>([
+    tileToIndex("2s"),
+    tileToIndex("3s"),
+    tileToIndex("4s"),
+    tileToIndex("6s"),
+    tileToIndex("8s"),
+    tileToIndex("F"),
+  ]);
+  for (let i = 0; i < 34; i++) {
+    if (counts[i] === 0) continue;
+    if (!greenIdx.has(i)) return false;
+  }
+  return true;
+}
+function isIttsuu(d: Decomp) {
+  // 同一スートで 123 / 456 / 789 の3順子
+  const bySuit: Record<"m" | "p" | "s", Set<string>> = {
+    m: new Set(),
+    p: new Set(),
+    s: new Set(),
+  };
+  for (const s of d.sets)
+    if (s.type === "chi") {
+      const suit = idxSuit(s.tiles[0]) as Suit;
+      const nums = s.tiles
+        .map(idxNumber)
+        .sort((a, b) => a - b)
+        .join("");
+      bySuit[suit].add(nums);
+    }
+  for (const suit of ["m", "p", "s"] as Suit[]) {
+    if (
+      bySuit[suit].has("123") &&
+      bySuit[suit].has("456") &&
+      bySuit[suit].has("789")
+    )
+      return true;
+  }
+  return false;
+}
+function isSanshokuDoujun(d: Decomp) {
+  // 各スートに同じ数字の順子があるか（例: 234m,234p,234s）
+  const map = new Map<string, Set<Suit>>();
+  for (const s of d.sets)
+    if (s.type === "chi") {
+      const nums = s.tiles
+        .map(idxNumber)
+        .sort((a, b) => a - b)
+        .join("");
+      const suit = idxSuit(s.tiles[0]) as Suit;
+      const key = nums;
+      if (!map.has(key)) map.set(key, new Set());
+      map.get(key)!.add(suit);
+    }
+  for (const [_, suits] of map) if (suits.size === 3) return true;
+  return false;
+}
+function isSanshokuDoukou(d: Decomp) {
+  // 同一数字の刻子が m/p/s で3つ
+  const cnt = new Map<number, Set<Suit>>();
+  for (const s of d.sets)
+    if (s.type === "pon" && s.tiles[0] < 27) {
+      const n = idxNumber(s.tiles[0]);
+      const suit = idxSuit(s.tiles[0]) as Suit;
+      if (!cnt.has(n)) cnt.set(n, new Set());
+      cnt.get(n)!.add(suit);
+    }
+  for (const k of cnt.values()) if (k.size === 3) return true;
+  return false;
+}
+function isChanta(counts: number[], d: Decomp, pairIdx: number) {
+  // すべての面子と雀頭が「么九or字」を含む
+  const pairOK = pairIdx >= 27 || isTerminal(pairIdx);
+  if (!pairOK) return false;
+  for (const s of d.sets) {
+    if (s.type === "chi") {
+      const n1 = idxNumber(s.tiles[0]);
+      const n3 = idxNumber(s.tiles[2]);
+      if (!(n1 === 1 || n3 === 9)) return false;
+    } else {
+      const i = s.tiles[0];
+      if (!(isHonor(i) || isTerminal(i))) return false;
+    }
+  }
+  return true;
+}
+function isJunchan(counts: number[], d: Decomp, pairIdx: number) {
+  // 字牌を含まず、全部が端（1 or 9）を含む
+  for (let i = 27; i < 34; i++) if (counts[i] > 0) return false;
+  const pairOK = isTerminal(pairIdx);
+  if (!pairOK) return false;
+  for (const s of d.sets) {
+    if (s.type === "chi") {
+      const n1 = idxNumber(s.tiles[0]);
+      const n3 = idxNumber(s.tiles[2]);
+      if (!(n1 === 1 || n3 === 9)) return false;
+    } else {
+      const i = s.tiles[0];
+      if (!isTerminal(i)) return false;
+    }
+  }
+  return true;
+}
+function countDragonPons(d: Decomp) {
+  let dragonsPon = 0;
+  for (const s of d.sets)
+    if (s.type === "pon" && s.tiles[0] >= 27) {
+      const h = honorTiles[s.tiles[0] - 27];
+      if (dragons.includes(h)) dragonsPon++;
+    }
+  return dragonsPon;
+}
+function countWindPons(d: Decomp) {
+  let windsPon = 0;
+  for (const s of d.sets)
+    if (s.type === "pon" && s.tiles[0] >= 27) {
+      const h = honorTiles[s.tiles[0] - 27];
+      if (winds.includes(h)) windsPon++;
+    }
+  return windsPon;
+}
+function countChiPairsForRyanpeiko(d: Decomp) {
+  // 同一順子が2組×2（=二盃口）
+  const chis = d.sets
+    .filter((s) => s.type === "chi")
+    .map((s) => s.tiles.join(","))
+    .sort();
+  let pairs = 0,
+    i = 1;
+  while (i < chis.length) {
+    if (chis[i] === chis[i - 1]) {
+      pairs++;
+      i += 2;
+    } else i++;
+  }
+  return pairs >= 2;
+}
+function isChinitsuOrHonitsu(counts: number[]) {
+  const suitHas = { m: false, p: false, s: false, z: false };
+  for (let i = 0; i < 34; i++) if (counts[i] > 0) suitHas[idxSuit(i)] = true;
+  const suits = (["m", "p", "s"] as Suit[]).filter((s) => suitHas[s]);
+  if (suits.length === 1 && !suitHas["z"]) return "chinitsu";
+  if (suits.length === 1 && suitHas["z"]) return "honitsu";
+  return "";
+}
+function isChuuren(counts: number[]) {
+  // 九蓮：門前 1スート限定 + 1112345678999 + 任意1枚
+  // かんたん検査：一色かつ、数牌のみで 1,9が各3枚以上／2–8が各1枚以上
+  let suit = -1;
+  for (let i = 0; i < 27; i++) {
+    if (counts[i] === 0) continue;
+    if (suit === -1) suit = Math.floor(i / 9);
+    if (suit !== Math.floor(i / 9)) return false;
+  }
+  if (suit === -1) return false;
+  const base = suit * 9;
+  const need = [3, 1, 1, 1, 1, 1, 1, 1, 3]; // 1..9
+  for (let k = 0; k < 9; k++) {
+    if (counts[base + k] < need[k]) return false;
+  }
+  // 合計14枚になっていることは手牌側で保証
+  return true;
+}
+function fourConcealedPonsPossible(d: Decomp, isClosed: boolean) {
+  // 門前なら「四暗刻」の可能性を判定（※ 単騎待ちの純正はBステップで）
+  if (!isClosed) return false;
+  let pons = 0;
+  for (const s of d.sets) if (s.type === "pon") pons++;
+  return pons === 4;
+}
+
 function judgeYaku(info: HandInfo): {
   han: number;
   yaku: YakuResult;
   decomp?: Decomp;
   isChiitoiHand: boolean;
+  yakuman: string[];
 } {
   const counts = info.counts.slice();
+  const yakus: YakuResult = [];
+  const yakuman: string[] = [];
+
   // 七対子
   if (isChiitoi(counts)) {
-    const yaku: YakuResult = [];
-    if (info.riichi) yaku.push({ name: "リーチ", han: 1 });
+    if (info.riichi) yakus.push({ name: "リーチ", han: 1 });
     if (info.winType === "tsumo" && info.isClosed)
-      yaku.push({ name: "門前清自摸和", han: 1 });
-    yaku.push({ name: "七対子", han: 2 });
-    // 混一色/清一色（七対子でも可）
-    const flush = detectFlush(counts);
-    if (flush.chinitsu) yaku.push({ name: "清一色", han: 6 });
-    else if (flush.honitsu) yaku.push({ name: "混一色", han: 3 });
-    const totalHan = yaku.reduce((a, b) => a + b.han, 0);
-    return { han: totalHan, yaku, isChiitoiHand: true };
+      yakus.push({ name: "門前清自摸和", han: 1 });
+    yakus.push({ name: "七対子", han: 2 });
+
+    const cs = isChinitsuOrHonitsu(counts);
+    if (cs === "chinitsu") yakus.push({ name: "清一色", han: 6 });
+    else if (cs === "honitsu")
+      yakus.push({ name: "混一色", han: info.isClosed ? 3 : 2 });
+
+    // 役満系（七対子由来では通常付かない）
+    return {
+      han: yakus.reduce((a, b) => a + b.han, 0),
+      yaku: yakus,
+      isChiitoiHand: true,
+      yakuman,
+    };
   }
 
-  // 通常手（4面子1雀頭）
+  // 4面子1雀頭を確認
   if (!canFormMentsuWithPair(counts)) {
-    return { han: 0, yaku: [], isChiitoiHand: false }; // 和了形でない
+    return { han: 0, yaku: [], isChiitoiHand: false, yakuman: [] };
   }
   const d = oneDecomposition(counts)!;
-  const yaku: YakuResult = [];
 
-  if (info.riichi) yaku.push({ name: "リーチ", han: 1 });
+  // 一般役
+  if (info.riichi) yakus.push({ name: "リーチ", han: 1 });
   if (info.winType === "tsumo" && info.isClosed)
-    yaku.push({ name: "門前清自摸和", han: 1 });
-  if (isTanyao(counts)) yaku.push({ name: "断么九", han: 1 });
+    yakus.push({ name: "門前清自摸和", han: 1 });
+  if (isTanyao(counts)) yakus.push({ name: "断么九", han: 1 });
   const yakuhaiHan = countYakuhaiPons(d, info.seatWind, info.roundWind);
-  if (yakuhaiHan > 0) yaku.push({ name: "役牌", han: yakuhaiHan });
+  if (yakuhaiHan > 0) yakus.push({ name: "役牌", han: yakuhaiHan });
   if (
     isPinfu(
       d,
@@ -416,20 +629,61 @@ function judgeYaku(info: HandInfo): {
       info.isClosed
     )
   )
-    yaku.push({ name: "平和", han: 1 });
+    yakus.push({ name: "平和", han: 1 });
   const iipeiko = countIipeiko(d, info.isClosed);
-  if (iipeiko) yaku.push({ name: "一盃口", han: 1 });
-  if (isToitoi(d)) yaku.push({ name: "対々和", han: 2 });
+  if (iipeiko) yakus.push({ name: "一盃口", han: 1 });
+  if (countChiPairsForRyanpeiko(d)) yakus.push({ name: "二盃口", han: 3 }); // 門前のみ
 
-  const flush = detectFlush(counts);
-  if (flush.chinitsu) yaku.push({ name: "清一色", han: info.isClosed ? 6 : 5 });
-  else if (flush.honitsu)
-    yaku.push({ name: "混一色", han: info.isClosed ? 3 : 2 });
+  if (isToitoi(d)) yakus.push({ name: "対々和", han: 2 });
+  if (isIttsuu(d)) yakus.push({ name: "一気通貫", han: info.isClosed ? 2 : 1 });
+  if (isSanshokuDoujun(d))
+    yakus.push({ name: "三色同順", han: info.isClosed ? 2 : 1 });
+  if (isSanshokuDoukou(d)) yakus.push({ name: "三色同刻", han: 2 });
 
-  const totalHan = yaku.reduce((a, b) => a + b.han, 0);
-  return { han: totalHan, yaku, decomp: d, isChiitoiHand: false };
+  if (isChanta(counts, d, d.pair))
+    yakus.push({ name: "全帯么九(チャンタ)", han: info.isClosed ? 2 : 1 });
+  if (isJunchan(counts, d, d.pair))
+    yakus.push({
+      name: "純全帯么九(ジュンチャン)",
+      han: info.isClosed ? 3 : 2,
+    });
+
+  // 老頭系
+  if (allTerminalsOrHonors(counts)) yakus.push({ name: "混老頭", han: 2 });
+  if (terminalsOnly(counts)) yakus.push({ name: "清老頭", han: 13 }); // 役満相当（実際は役満）
+
+  //一色
+  const cs = isChinitsuOrHonitsu(counts);
+  if (cs === "chinitsu")
+    yakus.push({ name: "清一色", han: info.isClosed ? 6 : 5 });
+  else if (cs === "honitsu")
+    yakus.push({ name: "混一色", han: info.isClosed ? 3 : 2 });
+
+  // 役満系（分解で判定できるもの）
+  const dr = countDragonPons(d);
+  if (dr === 3) yakuman.push("大三元");
+  else if (dr === 2) yakus.push({ name: "小三元", han: 2 }); // 実戦では2翻＋役牌3翻=合計5翻相当
+
+  const wp = countWindPons(d);
+  if (wp === 4) yakuman.push("大四喜");
+  else if (wp === 3) yakuman.push("小四喜");
+
+  if (honorsOnly(counts)) yakuman.push("字一色");
+  if (terminalsOnly(counts)) yakuman.push("清老頭");
+  if (greenOnly(counts)) yakuman.push("緑一色");
+  if (info.isClosed && isChuuren(counts)) yakuman.push("九蓮宝燈");
+  if (fourConcealedPonsPossible(d, info.isClosed)) yakuman.push("四暗刻"); // 単騎かどうかはBで拡張
+
+  //（注）三暗刻・三槓子・四槓子・槍槓・嶺上・海底/河底・天和/地和はBで対応
+  const totalHan = yakus.reduce((a, b) => a + b.han, 0);
+  return {
+    han: totalHan,
+    yaku: yakus,
+    decomp: d,
+    isChiitoiHand: false,
+    yakuman,
+  };
 }
-
 /** 符計算（実戦水準：七対子25符、平和ツモ20符、門前ロン+10、面子/雀頭/待ち/ツモ符） */
 function calcFu(
   info: HandInfo,
@@ -621,6 +875,7 @@ export const MahjongScorer: React.FC = () => {
         border: "1px solid #e5e7eb",
         borderRadius: 12,
       }}
+      className="bg-white"
     >
       <div
         style={{
