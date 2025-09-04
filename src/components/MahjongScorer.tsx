@@ -151,6 +151,16 @@ type HandInfo = {
   winningTileIdx?: number; // 和了牌（待ち形用・平和判定用）
 };
 
+const honorGlyph: Record<Honor, string> = {
+  E: "東",
+  S: "南",
+  W: "西",
+  N: "北",
+  P: "　",
+  F: "發",
+  C: "中",
+};
+
 function cloneCounts(a: number[]) {
   return a.slice();
 }
@@ -673,7 +683,7 @@ export const MahjongScorer: React.FC = () => {
             onChange={(e) => setRoundWind(e.target.value as Honor)}
             style={{ padding: 8, borderRadius: 8, border: "1px solid #d1d5db" }}
           >
-            {["E", "S", "W", "N"].map((w) => (
+            {["東", "南", "西", "北"].map((w) => (
               <option key={w} value={w}>
                 {w}
               </option>
@@ -687,7 +697,7 @@ export const MahjongScorer: React.FC = () => {
             onChange={(e) => setSeatWind(e.target.value as Honor)}
             style={{ padding: 8, borderRadius: 8, border: "1px solid #d1d5db" }}
           >
-            {["E", "S", "W", "N"].map((w) => (
+            {["東", "南", "西", "北"].map((w) => (
               <option key={w} value={w}>
                 {w}
               </option>

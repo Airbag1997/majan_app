@@ -55,7 +55,7 @@ export const MahjongTile: React.FC<MahjongTileProps> = ({
     S: "南",
     W: "西",
     N: "北",
-    P: "白",
+    P: "　",
     F: "發",
     C: "中",
   };
@@ -73,9 +73,7 @@ export const MahjongTile: React.FC<MahjongTileProps> = ({
       case "p":
         return (
           <g>
-            <circle cx="24" cy="32" r="4" />
-            <circle cx="34" cy="32" r="4" />
-            <circle cx="14" cy="32" r="4" />
+            <circle cx="28" cy="36" r="7" />
           </g>
         );
       case "s":
