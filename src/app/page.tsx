@@ -49,7 +49,7 @@ export default function Home() {
           {/* カード1 */}
           <div>
             <Card
-              link="https://www.google.com/?hl=ja"
+              link="/calc"
               title="点数計算ツール"
               description="和了時の点数を符・翻から自動計算。リーチ・ツモ・振り込みも対応"
             />
