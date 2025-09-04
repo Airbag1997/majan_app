@@ -32,6 +32,7 @@ export default function RootLayout({
             麻雀アプリ
           </h1>
           <nav>
+            <a href="http://localhost:3000/" className="ml-3 font-semibold">機能一覧</a>
             <a href="articles" className="ml-3 font-semibold">記事一覧</a>
             <a href="contacts" className="ml-3 font-semibold">お問い合わせ</a>
           </nav>
